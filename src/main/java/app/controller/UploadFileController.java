@@ -8,8 +8,8 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,7 +32,7 @@ public class UploadFileController {
     @Autowired
     private ProduktRepository produktRepository;
 
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @PostMapping(value = "/upload")
     public String upload(@RequestParam("fileToUpload") MultipartFile file) {
 
         List<Produkt> records = new ArrayList<>();

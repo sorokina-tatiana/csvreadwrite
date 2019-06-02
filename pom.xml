@@ -14,14 +14,6 @@
         <version>2.1.5.RELEASE</version>
     </parent>
 
-    <repositories>
-        <repository>
-            <id>datapipeline</id>
-            <url>https://maven.northconcepts.com/public/repositories/datapipeline</url>
-            <releases/>
-        </repository>
-    </repositories>
-
     <dependencies>
         <!-- Spring boot dependency -->
         <dependency>
@@ -43,13 +35,6 @@
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>4.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.northconcepts</groupId>
-            <artifactId>northconcepts-datapipeline-small-business</artifactId>
-            <version>5.0.0</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -89,8 +74,37 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.6</version>
+                <configuration>
+                    <workingDirectory>src/main/frontend</workingDirectory>
+                    <installDirectory>target</installDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install node and npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <configuration>
+                            <nodeVersion>v10.11.0</nodeVersion>
+                            <npmVersion>6.4.1</npmVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>install</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
-
-
 </project>
