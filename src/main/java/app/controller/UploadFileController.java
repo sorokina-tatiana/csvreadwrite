@@ -1,12 +1,13 @@
 package app.controller;
 
 import app.model.Produkt;
-import com.northconcepts.datapipeline.core.Record;
-import com.northconcepts.datapipeline.core.RecordList;
+import app.model.ProduktRepository;
+import com.google.gson.Gson;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,10 @@ import java.util.List;
 @Controller
 public class UploadFileController {
 
+    @Autowired
+    private ProduktRepository produktRepository;
+
+
     @RequestMapping("/")
     public String index() {
         return "index";
@@ -36,7 +41,7 @@ public class UploadFileController {
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public String upload(@RequestParam("fileToUpload") MultipartFile file, Model model) {
 
-        List<List<String>> records = new ArrayList<>();
+        List<Produkt> records = new ArrayList<>();
         byte[] bytes = new byte[0];
         try {
             bytes = file.getBytes();
@@ -52,16 +57,26 @@ public class UploadFileController {
             CSVReader csvReader = new CSVReaderBuilder(br).withCSVParser(parser).build();
             String[] nextRecord;
             boolean hasHeaders = false;
+            List<String> headers = new ArrayList<>();
             while ((nextRecord = csvReader.readNext()) != null) {
                 if (!hasHeaders) {
                     hasHeaders = true;
-                    model.addAttribute("headers", nextRecord);
+                    headers = Arrays.asList(nextRecord);
+                    model.addAttribute("headers", headers);
                 } else {
+
                     List<String> values = Arrays.asList(nextRecord);
-                    records.add(values);
+                    if (values.size() != headers.size()) {
+                        model.addAttribute("message", "Data error");
+                    } else {
+                        Produkt produkt = new Produkt(values);
+                        produktRepository.save(produkt);
+                        records.add(produkt);
                     }
+                }
             }
-            model.addAttribute("records", records);
+            Gson gson = new Gson();
+            model.addAttribute("records", gson.toJson(records));
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

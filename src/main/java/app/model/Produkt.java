@@ -1,12 +1,17 @@
 package app.model;
 
-import org.springframework.data.annotation.Id;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Id;
+
+import java.util.List;
 
 
 @Entity
+@Table(name = "produkte")
 public class Produkt {
+
     @Id
     private String Hauptartikelnr;
     private String Artikelname;
@@ -25,6 +30,29 @@ public class Produkt {
     private String Ursprungsland;
     private String Bildname;
 
+    public Produkt() {
+    }
+
+    public Produkt(List<String> values) {
+        if (values.size() == 16) {
+            this.Hauptartikelnr = values.get(0);
+            this.Artikelname = values.get(1);
+            this.Hersteller = values.get(2);
+            this.Beschreibung = values.get(3);
+            this.Materialangaben = values.get(4);
+            this.Geschlecht = values.get(5);
+            this.Produktart = values.get(6);
+            this.Ärmel = values.get(7);
+            this.Bein = values.get(8);
+            this.Kragen = values.get(9);
+            this.Herstellung = values.get(10);
+            this.Taschenart = values.get(11);
+            this.Grammatur = values.get(12);
+            this.Material = values.get(13);
+            this.Ursprungsland = values.get(14);
+            this.Bildname = values.get(15);
+        }
+    }
 
     public String getHauptartikelnr() {
         return Hauptartikelnr;
