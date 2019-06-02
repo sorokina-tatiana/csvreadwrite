@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -25,21 +26,14 @@ import java.util.Arrays;
 import java.util.List;
 
 
-@Controller
+@RestController
 public class UploadFileController {
 
     @Autowired
     private ProduktRepository produktRepository;
 
-
-    @RequestMapping("/")
-    public String index() {
-        return "index";
-    }
-
-
     @RequestMapping(value = "/", method = RequestMethod.POST)
-    public String upload(@RequestParam("fileToUpload") MultipartFile file, Model model) {
+    public String upload(@RequestParam("fileToUpload") MultipartFile file) {
 
         List<Produkt> records = new ArrayList<>();
         byte[] bytes = new byte[0];
@@ -62,12 +56,9 @@ public class UploadFileController {
                 if (!hasHeaders) {
                     hasHeaders = true;
                     headers = Arrays.asList(nextRecord);
-                    model.addAttribute("headers", headers);
                 } else {
-
                     List<String> values = Arrays.asList(nextRecord);
                     if (values.size() != headers.size()) {
-                        model.addAttribute("message", "Data error");
                     } else {
                         Produkt produkt = new Produkt(values);
                         produktRepository.save(produkt);
@@ -76,7 +67,7 @@ public class UploadFileController {
                 }
             }
             Gson gson = new Gson();
-            model.addAttribute("records", gson.toJson(records));
+            return gson.toJson(records);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -84,6 +75,6 @@ public class UploadFileController {
             e.printStackTrace();
         }
 
-        return "index";
+        return "";
     }
 }
