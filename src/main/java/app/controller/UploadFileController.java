@@ -33,7 +33,7 @@ public class UploadFileController {
     private ProduktRepository produktRepository;
 
     @PostMapping(value = "/upload")
-    public String upload(@RequestParam("fileToUpload") MultipartFile file) {
+    public String upload(MultipartFile file) {
 
         List<Produkt> records = new ArrayList<>();
         byte[] bytes = new byte[0];
