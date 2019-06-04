@@ -1,6 +1,8 @@
 (function() {
     var uploadButton = document.getElementById('upload-button');
     var downloadButton = document.getElementById('download-button');
+    var isEditing = false;
+    var tableHeaders = [];
 
     uploadButton.addEventListener('click', function(event) {
         event.preventDefault();
@@ -12,7 +14,9 @@
                 'Content-Type': 'multipart/form-data'
             }
         }).then(function(res) {
-            generateTableHeader(res.data);
+            tableHeaders = Object.keys(res.data[0]);
+
+            generateTableHeader();
             generateTableBody(res.data);
         }).catch(function(err) {
             console.log(err)
@@ -23,34 +27,11 @@
         axios.get('/download');
     });
 
-    var createButton = function(type, callback) {
-        var btn = document.createElement('button');
-        btn.textContent = type;
-        btn.addEventListener('click', callback);
-        return btn;
-    };
-
-    var editFields = function(event) {
-        console.log(event.target);
-    };
-
-    var saveChanges = function(event) {
-        var data;
-
-        axios.post('/save-entry', data)
-            .then(function(res) {
-                console.log(res);
-            })
-            .catch(function(err) {
-                console.log(err);
-            })
-    };
-
-    var generateTableHeader = function(data) {
+    var generateTableHeader = function() {
         var tableHead = document.getElementById('table-head');
         var tableHeaderRow = document.createElement('tr');
 
-        Object.keys(data[0] || []).forEach(function(key) {
+        tableHeaders.forEach(function(key) {
             var th = document.createElement('th');
             th.textContent = key;
             tableHeaderRow.appendChild(th);
@@ -70,19 +51,79 @@
 
             Object.keys(record || []).forEach(function(key) {
                 var td = document.createElement('td');
-                td.textContent = record[key];
+                var input = document.createElement('input');
+                input.setAttribute('type', 'text');
+                input.setAttribute('value', record[key]);
+                input.readOnly = true;
+                td.appendChild(input);
                 tr.appendChild(td);
             });
             var td = document.createElement('td');
 
-            var btnEdit = createButton('Edit', editFields);
+            var btnEdit = createButton('Edit', editFields, true);
             td.appendChild(btnEdit);
 
-            var btnSave = createButton('Save', saveChanges);
+            var btnSave = createButton('Save', saveChanges, false);
             td.appendChild(btnSave);
             tr.appendChild(td);
 
             tableBody.appendChild(tr);
         });
-    }
+    };
+
+    var createButton = function(type, callback, isVisible) {
+        var btn = document.createElement('button');
+        btn.textContent = type;
+        btn.setAttribute('id', type.toLowerCase());
+        btn.addEventListener('click', callback);
+        if (!isVisible) {
+          btn.style.display = 'none';
+        }
+        return btn;
+    };
+
+    var editFields = function(event) {
+        if (isEditing) {
+           return false;
+        }
+
+        var currentElement = event.target;
+        toggleTableState(currentElement, true, 'save');
+        var cells = getTableCells(currentElement);
+        toggleCellsState(cells, false);
+    };
+
+    var saveChanges = function(event) {
+        var cells = getTableCells(event.target);
+        toggleCellsState(cells, true);
+        var data = {};
+        tableHeaders.forEach(function(item, index) {
+            data[item.toLowerCase()] = cells[index].value;
+        });
+
+        axios.post('/save-entry', data)
+            .then(function(res) {
+                toggleTableState(event.target, false, 'edit');
+            })
+            .catch(function(err) {
+                toggleTableState(event.target, false, 'edit');
+            })
+    };
+
+    var toggleTableState = function(target, isEditingState, btnName) {
+        isEditing = isEditingState;
+        target.parentNode.querySelector('#' + btnName).style.display = 'block';
+        target.style.display = 'none';
+    };
+
+    var toggleCellsState = function(cells, readOnly) {
+        cells.forEach(function(cell) {
+            cell.readOnly = readOnly;
+        });
+    };
+
+    var getTableCells = function(target) {
+        var currentRow = target.parentNode.parentNode;
+        return currentRow.querySelectorAll('td input[type="text"]');
+    };
 })();
